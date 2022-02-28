@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.person.shop_data_schedule.mapper.HistoryMapper">
+    <select id="selectPageConnHistory" resultType="com.person.shop_data_schedule.data.PageConnVO">
+        select * from page_conn_history 
+        where pch_reg_dt between #{start_dt} and #{end_dt}
+    </select>
+</mapper>
