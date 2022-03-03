@@ -5,4 +5,28 @@
         select * from page_conn_history 
         where pch_reg_dt between #{start_dt} and #{end_dt}
     </select>
+    <select id="selectMemberProdHistory" resultType="com.person.shop_data_schedule.data.MemberProdVO">
+        select * from member_prod_history 
+        where mph_reg_dt between #{start_dt} and #{end_dt}
+    </select>
+    <select id="selectReviewInfo" resultType="com.person.shop_data_schedule.data.ReviewInfoVO">
+        select
+        	ri_mi_seq,ri_pi_seq,ri_score,
+        	ri_mod_dt,ri_status,ri_report_cnt
+        from review_info 
+        where ri_mod_dt between #{start_dt} and #{end_dt}
+    </select>
+    <select id="selectShoppingRecord" resultType="com.person.shop_data_schedule.data.ShoppingRecordVO">
+        select 
+        	scd_mi_seq, 
+        	scd_pi_seq, 
+        	sum(scd_count) as buy_quantity, 
+        	avg(scd_count) as buy_quantity_avg,
+        	count(*) as buy_frequncy 
+        from( 
+        	select * from shopping_cart_data where scd_status = #{status}
+        	and scd_mod_dt between #{start_dt} and #{end_dt}
+        )a
+        group by scd_mi_seq, scd_pi_seq 
+    </select>
 </mapper>
