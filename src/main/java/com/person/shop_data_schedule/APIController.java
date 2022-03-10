@@ -1,17 +1,27 @@
 package com.person.shop_data_schedule;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import com.person.shop_data_schedule.data.MemberHashDataVO;
+import com.person.shop_data_schedule.data.MemberInfoVO;
 import com.person.shop_data_schedule.data.MemberProdVO;
 import com.person.shop_data_schedule.data.PageConnVO;
+import com.person.shop_data_schedule.data.ProductHashDataVO;
+import com.person.shop_data_schedule.data.ProductInfoVO;
+import com.person.shop_data_schedule.data.RecommendProdToMemberVO;
 import com.person.shop_data_schedule.data.ReviewInfoVO;
 import com.person.shop_data_schedule.data.ShoppingRecordVO;
 import com.person.shop_data_schedule.mapper.HistoryMapper;
+import com.person.shop_data_schedule.mapper.RecommendMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +40,12 @@ public class APIController {
     @Value("${history.shopping_cart.path}")String shopping_cart_path;
     @Value("${history.shopping_buy.path}")String shopping_buy_path;
     @Value("${history.shopping_cancel.path}")String shopping_cancel_path;
+    @Value("${history.member_info.path}")String member_path;
+    @Value("${history.product_info.path}")String product_path;
+    @Value("${recommend.hash.path}")String recommend_hash_path;
+    @Value("${recommend.output.path}")String recommend_output_path;
     @Autowired HistoryMapper history_mapper;
+    @Autowired RecommendMapper recommend_mapper;
 
     @GetMapping("/conn")
     public String userConnData(@RequestParam String start, @RequestParam String end) throws Exception{
@@ -213,5 +228,142 @@ public class APIController {
         src_buy_File.renameTo(dest_buy_File);
         src_cancel_File.renameTo(dest_cancel_File);
         return "쇼핑 정보 수집 스케줄 실행";
+    }
+
+    @GetMapping("/member")
+    public String getMemberInfo(@RequestParam String start, @RequestParam String end)throws Exception{
+        Calendar c = Calendar.getInstance();
+        String src = path+"member"+c.getTimeInMillis()+".txt";
+        String dest = member_path+"member"+c.getTimeInMillis()+".txt";
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(
+            Integer.parseInt(start.split("-")[0]), 
+            Integer.parseInt(start.split("-")[1])-1, 
+            Integer.parseInt(start.split("-")[2]),
+            0,0,0
+        );
+        Date startDt = cal.getTime();
+
+        cal.set(
+            Integer.parseInt(end.split("-")[0]), 
+            Integer.parseInt(end.split("-")[1])-1, 
+            Integer.parseInt(end.split("-")[2]),
+            23,59,59
+        );
+        Date endDt = cal.getTime();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(src)));
+
+        List<MemberInfoVO> list = history_mapper.selectMemberInfo(startDt, endDt);
+        for(MemberInfoVO x:list){
+            bw.write(x.toString());
+            bw.newLine();
+        }
+        bw.close();
+
+        File src_file = new File(src);
+        File dest_file = new File(dest);
+        src_file.renameTo(dest_file);
+
+        return "회원정보 수집 스케줄 실행";
+    }
+    @GetMapping("/product")
+    public String getProductInfo(@RequestParam String start, @RequestParam String end)throws Exception{
+        Calendar c = Calendar.getInstance();
+        String src = path+"product"+c.getTimeInMillis()+".txt";
+        String dest = product_path+"product"+c.getTimeInMillis()+".txt";
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(
+            Integer.parseInt(start.split("-")[0]), 
+            Integer.parseInt(start.split("-")[1])-1, 
+            Integer.parseInt(start.split("-")[2]),
+            0,0,0
+        );
+        Date startDt = cal.getTime();
+
+        cal.set(
+            Integer.parseInt(end.split("-")[0]), 
+            Integer.parseInt(end.split("-")[1])-1, 
+            Integer.parseInt(end.split("-")[2]),
+            23,59,59
+        );
+        Date endDt = cal.getTime();
+        
+        List<ProductInfoVO> list = history_mapper.selectProductInfo(startDt, endDt);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(src)));
+
+        for(ProductInfoVO x:list){
+            bw.write(x.toString());
+            bw.newLine();
+        }
+        bw.close();
+
+        File src_file = new File(src);
+        File dest_file = new File(dest);
+
+        src_file.renameTo(dest_file);
+        return "제품정보 수집 스케줄 실행";
+    }
+
+    @GetMapping("/recommend")
+    public String getRecommendData()throws Exception{
+        File member_hash_file = new File(recommend_hash_path+"member/000000_0");
+        File product_hash_file = new File(recommend_hash_path+"product/000000_0");
+        File recommend_file = new File(recommend_output_path+"part-r-00000");
+        List<MemberHashDataVO> member_list = new ArrayList<MemberHashDataVO>();
+        List<ProductHashDataVO> product_list = new ArrayList<ProductHashDataVO>();
+        List<RecommendProdToMemberVO> recommend_list = new ArrayList<RecommendProdToMemberVO>();
+
+        BufferedReader reader = new BufferedReader(new FileReader(member_hash_file));
+        String line = null;
+        while((line = reader.readLine()) != null){
+            MemberHashDataVO data = new MemberHashDataVO();
+            data.setMhd_hash(line.split("[|]")[0]);
+            data.setMhd_email(line.split("[|]")[1]);
+            try{
+                data.setMhd_mi_seq(Integer.parseInt(line.split("[|]")[2]));
+            }catch(NumberFormatException e){
+                continue;
+            }
+            member_list.add(data);
+        }
+        reader.close();
+
+        reader = new BufferedReader(new FileReader(product_hash_file));
+        line = null;
+        while((line = reader.readLine()) != null){
+            ProductHashDataVO data = new ProductHashDataVO();
+            data.setPhd_hash(line.split("[|]")[0]);
+            data.setPhd_name(line.split("[|]")[1]);
+            try{
+                data.setPhd_pi_seq(Integer.parseInt(line.split("[|]")[2]));
+            }catch(NumberFormatException e){
+                continue;
+            }
+            product_list.add(data);
+        }
+        reader.close();
+
+
+        reader = new BufferedReader(new FileReader(recommend_file));
+        line = null;
+        while((line = reader.readLine()) != null){
+            String member_hash = line.split("\\[")[0].trim();
+            String[] product = line.split("\\[")[1].replaceAll("\\]", "").split(",");
+            for(int i=0; i<product.length; i++){
+                RecommendProdToMemberVO data = new RecommendProdToMemberVO();
+                data.setRptm_member_hash(member_hash);
+                data.setRptm_product_hash(product[i].split(":")[0]);
+                data.setRptm_score(Double.parseDouble(product[i].split(":")[1]));
+                recommend_list.add(data);
+            }
+        }
+        reader.close();
+        recommend_mapper.insertMemberHashData(member_list);
+        recommend_mapper.insertProductHashData(product_list);
+        recommend_mapper.insertRecommendHashData(recommend_list);
+        return "추천 정보를 가져왔습니다.";
     }
 }

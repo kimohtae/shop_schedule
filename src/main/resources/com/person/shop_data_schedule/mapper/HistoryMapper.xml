@@ -29,4 +29,14 @@
         )a
         group by scd_mi_seq, scd_pi_seq 
     </select>
+
+    <select id="selectMemberInfo" resultType="com.person.shop_data_schedule.data.MemberInfoVO">
+        select mi_seq,mi_email,mi_gen,mi_grade from member_info
+        where mi_role != 99 and
+        mi_reg_dt between #{start_dt} and #{end_dt}; 
+    </select>
+    <select id="selectProductInfo" resultType="com.person.shop_data_schedule.data.ProductInfoVO">
+        select pi_seq,pi_name,cate_name,mfi_name from product_detail_info
+        where pi_release_date between #{start_dt} and #{end_dt}; 
+    </select>
 </mapper>

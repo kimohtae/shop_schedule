@@ -7,8 +7,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.person.shop_data_schedule.data.MemberInfoVO;
 import com.person.shop_data_schedule.data.MemberProdVO;
 import com.person.shop_data_schedule.data.PageConnVO;
+import com.person.shop_data_schedule.data.ProductInfoVO;
 import com.person.shop_data_schedule.data.ReviewInfoVO;
 import com.person.shop_data_schedule.data.ShoppingRecordVO;
 import com.person.shop_data_schedule.mapper.HistoryMapper;
@@ -27,6 +29,8 @@ public class ScheduleComponent{
     @Value("${history.shopping_cart.path}")String shopping_cart_path;
     @Value("${history.shopping_buy.path}")String shopping_buy_path;
     @Value("${history.shopping_cancel.path}")String shopping_cancel_path;
+    @Value("${history.member_info.path}")String member_path;
+    @Value("${history.product_info.path}")String product_path;
     @Autowired HistoryMapper history_mapper;
 
     @Scheduled(cron = "0 0 3 * * *")
@@ -173,5 +177,64 @@ public class ScheduleComponent{
         src_cart_File.renameTo(dest_cart_File);
         src_buy_File.renameTo(dest_buy_File);
         src_cancel_File.renameTo(dest_cancel_File);
+    }
+
+    @Scheduled(cron = "0 30 3 * * *")
+    public void MemberDataSchedule()throws Exception{
+        Calendar c = Calendar.getInstance();
+        String src = path+"member"+c.getTimeInMillis()+".txt";
+        String dest = member_path+"member"+c.getTimeInMillis()+".txt";
+
+        Calendar search_dt = Calendar.getInstance();
+        search_dt.set(Calendar.HOUR, 0);
+        search_dt.set(Calendar.MINUTE, 0);
+        search_dt.set(Calendar.SECOND, 0);
+
+        Date endDt = search_dt.getTime();
+        search_dt.add(Calendar.DATE, -1);
+        Date startDt = search_dt.getTime();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(src)));
+
+        List<MemberInfoVO> list = history_mapper.selectMemberInfo(startDt, endDt);
+        for(MemberInfoVO x:list){
+            bw.write(x.toString());
+            bw.newLine();
+        }
+        bw.close();
+
+        File src_file = new File(src);
+        File dest_file = new File(dest);
+        src_file.renameTo(dest_file);
+
+    }
+    @Scheduled(cron = "0 35 3 * * *")
+    public void ProductDataSchedule()throws Exception{
+        Calendar c = Calendar.getInstance();
+        String src = path+"product"+c.getTimeInMillis()+".txt";
+        String dest = product_path+"product"+c.getTimeInMillis()+".txt";
+
+        Calendar search_dt = Calendar.getInstance();
+        search_dt.set(Calendar.HOUR, 0);
+        search_dt.set(Calendar.MINUTE, 0);
+        search_dt.set(Calendar.SECOND, 0);
+
+        Date endDt = search_dt.getTime();
+        search_dt.add(Calendar.DATE, -1);
+        Date startDt = search_dt.getTime();
+        
+        List<ProductInfoVO> list = history_mapper.selectProductInfo(startDt, endDt);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(src)));
+
+        for(ProductInfoVO x:list){
+            bw.write(x.toString());
+            bw.newLine();
+        }
+        bw.close();
+
+        File src_file = new File(src);
+        File dest_file = new File(dest);
+
+        src_file.renameTo(dest_file);
     }
 }

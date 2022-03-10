@@ -72,6 +72,28 @@
                     }
                 })
             })
+            $("#prodcut").click(function(){
+                let start = $("#begin").val();
+                let end = $("#end").val();
+                $.ajax({
+                    url:"/api/product?start="+start+"&end="+end,
+                    type:"get",
+                    success:function(msg){
+                        alert(msg);
+                    }
+                })
+            })
+            $("#member").click(function(){
+                let start = $("#begin").val();
+                let end = $("#end").val();
+                $.ajax({
+                    url:"/api/member?start="+start+"&end="+end,
+                    type:"get",
+                    success:function(msg){
+                        alert(msg);
+                    }
+                })
+            })
         })
     </script>
 </head>
@@ -89,6 +111,8 @@
         <button id="prod">제품 조회 기록 로그파일 생성</button>
         <button id="review">리뷰 기록 로그파일 생성</button>
         <button id="shopping">쇼핑 기록 로그파일 생성</button>
+        <button id="prodcut">제품 기록 로그파일 생성</button>
+        <button id="member">회원 기록 로그파일 생성</button>
     </div>
 </body>
 </html>

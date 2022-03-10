@@ -3,8 +3,10 @@ package com.person.shop_data_schedule.mapper;
 import java.util.Date;
 import java.util.List;
 
+import com.person.shop_data_schedule.data.MemberInfoVO;
 import com.person.shop_data_schedule.data.MemberProdVO;
 import com.person.shop_data_schedule.data.PageConnVO;
+import com.person.shop_data_schedule.data.ProductInfoVO;
 import com.person.shop_data_schedule.data.ReviewInfoVO;
 import com.person.shop_data_schedule.data.ShoppingRecordVO;
 
@@ -16,4 +18,9 @@ public interface HistoryMapper {
     List<MemberProdVO> selectMemberProdHistory(Date start_dt, Date end_dt);
     List<ReviewInfoVO> selectReviewInfo(Date start_dt, Date end_dt);
     List<ShoppingRecordVO> selectShoppingRecord(Date start_dt, Date end_dt, Integer status);
+
+    List<MemberInfoVO> selectMemberInfo(Date start_dt, Date end_dt);
+    List<ProductInfoVO> selectProductInfo(Date start_dt, Date end_dt);
+
+    
 }

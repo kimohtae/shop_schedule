@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.person.shop_data_schedule.mapper.RecommendMapper">
+    <insert id="insertMemberHashData">
+        insert into member_hash_data
+            (mhd_hash,mhd_email,mhd_mi_seq)
+        values
+            <foreach collection="list" item="item" separator=",">
+                (#{item.mhd_hash},#{item.mhd_email},#{item.mhd_mi_seq})
+            </foreach>
+    </insert>
+    
+    <insert id="insertProductHashData">
+        insert into product_hash_data
+            (phd_hash,phd_name,phd_pi_seq)
+        values
+            <foreach collection="list" item="item" separator=",">
+                (#{item.phd_hash},#{item.phd_name},#{item.phd_pi_seq})
+            </foreach>
+    </insert>
+    
+    <insert id="insertRecommendHashData">
+        insert into recommend_prod_to_member
+            (rptm_product_hash,rptm_member_hash,rptm_score)
+        values
+            <foreach collection="list" item="item" separator=",">
+                (#{item.rptm_product_hash},#{item.rptm_member_hash},#{item.rptm_score})
+            </foreach>
+    </insert>
+</mapper>
